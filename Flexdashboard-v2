@@ -1,0 +1,745 @@
+---
+title: "Coronavirus Disease (COVID19) - Malaysia"
+output: 
+  flexdashboard::flex_dashboard:
+    logo: covid19-1.jpg
+    orientation: row
+    vertical_layout: fill
+    navbar:
+       - { title: "Developer", href: "http://nasirdrive1.wixsite.com/nasir916", align: right }
+    theme : readable
+   
+---
+
+<style>                     
+.navbar {
+  background-color: white; 
+  border-color:black;
+}
+.navbar-brand {
+color:black!important;
+}
+
+.bgred {
+  background-color: grey;
+}
+</style> 
+
+
+
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(rvest)
+library(dplyr)
+library(tidyverse)
+library(DT)
+library(forcats)
+library(rpivotTable)
+
+#Specifying the url for desired website to be scraped
+url <- 'http://www.moh.gov.my/index.php/pages/view/2019-ncov-wuhan'
+#Reading the HTML code from the website
+webpage <- read_html(url)
+# Negeri
+#Using CSS selectors to scrape the title section
+title_data_html <- html_nodes(webpage,'center')
+#Converting the title data to text
+title_data <- html_text(title_data_html)
+#Let's have a look at the Negeri
+head(title_data)
+title_data 
+title_data1 <- gsub('\t\t\t',",", title_data[1])
+title_data1
+title_data1 <- gsub('\t\t', ",", title_data1 )
+title_data1
+title_data1 <- gsub('\n', "", title_data1)
+title_data1
+a <- str_split_fixed(title_data1, ",", 8)
+a <- a[, c(1,2,3,4,5,6)]
+a <- t(a)
+a1 <- c(a[,1], a[,2])
+a2 <- c(a[,3], a[,4])
+a3 <- c(a[,5], a[,6])
+a4 <- rbind(a1,a2,a3)
+a4 <- as.data.frame(a4)
+library(varhandle)
+a4$V2 <- unfactor(a4$V2)
+
+title_data2 <- gsub('\t\t\t',",", title_data[3])
+title_data2
+title_data2 <- gsub('\t\t', ",", title_data2 )
+title_data2
+title_data2 <- gsub('\n', "", title_data2)
+title_data2
+b <- str_split_fixed(title_data2, ",", 6)
+b <- b[, c(1,2,3,4,5,6)]
+b <- t(b)
+b1 <- c(b[,1], b[,2])
+b2 <- c(b[,3], b[,4])
+b3 <- c(b[,5], b[,6])
+b3 <- gsub(',', "", b3)
+b4 <- rbind(b1,b2,b3)
+b4 <- as.data.frame(b4)
+library(varhandle)
+b4$V2 <- unfactor(b4$V2)
+
+#System Date
+g <- Sys.Date()
+
+
+
+#####################
+# From Out Break dot My
+#####################
+#Loading the rvest package
+library('rvest')
+
+#Specifying the url for desired website to be scraped
+url <- 'https://www.outbreak.my/'
+
+#Reading the HTML code from the website
+webpage <- read_html(url)
+
+
+
+# Negeri
+
+#Using CSS selectors to scrape the title section
+title_data_html <- html_nodes(webpage,'.text-value')
+
+#Converting the title data to text
+title_data <- html_text(title_data_html)
+
+#Let's have a look at the Negeri
+library(dplyr)
+head(title_data)
+title_data 
+Negeri1 <- as.data.frame(title_data)
+a <- str_split_fixed(title_data, " ", 2)
+a
+Negeri1 <- c()
+Negeri1 <-gsub("\n","", a[,1])
+
+Negeri1 <- as.data.frame(Negeri1)
+Negeri1$Negeri1 <- as.character(Negeri1$Negeri1)
+Negeri1$Negeri1[Negeri1$Negeri1 == "Negeri"] <- "Negeri Sembilan"
+Negeri1$Negeri1[Negeri1$Negeri1 == "Kuala"] <- "Kuala Lumpur"
+Negeri1
+dim(Negeri1)
+# Negeri1 <- Negeri1 %>% filter(  title_data == "\nKuala Lumpur\n" | title_data == "\nSelangor\n" |
+#                                   title_data == "\nSabah\n" | 
+#                                   title_data == "\nSarawak\n" | 
+#                                   title_data == "\nJohor\n" | 
+#                                   title_data == "\nPenang\n" | 
+#                                   title_data == "\nNegeri Sembilan\n" | 
+#                                   title_data == "\nTerengganu\n" | 
+#                                   title_data == "\nPutrajaya\n" | 
+#                                   title_data == "\nPerlis\n" | 
+#                                   title_data == "\nKedah\n" | 
+#                                   title_data == "\nPahang\n" | 
+#                                   title_data == "\nPerak\n" | 
+#                                   title_data == "\nMelaka\n" | 
+#                                   title_data == "\nKelantan\n" |
+#                                   title_data == "\nSarawak (SDMC)\n" |
+#                                   title_data == "\nLabuan\n" |
+#                                   title_data == "\nTotal\n" | 
+#                                   title_data == "\n Total\n") 
+# Negeri1 <- as.character(Negeri1$title_data)
+# Negeri1 <-gsub("\n","", Negeri1)
+# Negeri1 <- as.data.frame(Negeri1)
+# dim(Negeri1)
+# Negeri1
+#Cumulative Case
+#Using CSS selectors to scrape the title section
+title_data_html <- html_nodes(webpage,'.text-value-total')
+#Converting the title data to text
+Cumulative <- html_text(title_data_html)
+#Let's have a look at the title
+head(Cumulative)
+Cumulative
+Cumulative <-gsub('\n',"", Cumulative)
+Cumulative <- as.data.frame(Cumulative)
+# Cumulative <- as.numeric(Cumulative)
+Cumulative <- as.data.frame(Cumulative)
+Cumulative
+dim(Cumulative)
+#CUmulative Death
+#Using CSS selectors to scrape the title section
+title_data_html <- html_nodes(webpage,'.text-value-black')
+#Converting the title data to text
+Death <- html_text(title_data_html)
+#Let's have a look at the title
+head(Death)
+Death
+Death <-gsub('\n',"", Death)
+Death <- as.data.frame(Death)
+# Death <- as.numeric(Death)
+Death <- as.data.frame(Death)
+Death
+dim(Death)
+#####################################
+# Combine DataSet (Malaysia by State)
+#####################################
+Combine <- c()
+Combine$Negeri <- Negeri1$Negeri1
+Combine$Cumulative <- Cumulative$Cumulative
+Combine$Death <- Death$Death
+Combine <- as.data.frame(Combine)
+Combine
+
+#####################################
+# Malaysia Chart
+#####################################
+
+library(highcharter)
+mygeojson <- get_data_from_map(download_map_data("https://code.highcharts.com/mapdata/countries/my/my-all.js"))
+mygeojson$'woe-name' #untuk tgk list states yang ada dalam map ini
+#To change Name "Negeri" according to "woe-name" requirement
+Combine$Negeri <- as.character(Combine$Negeri)
+Combine$Negeri[Combine$Negeri == "JOHOR"] <- "Johor"
+Combine$Negeri[Combine$Negeri == "KEDAH"] <- "Kedah"
+Combine$Negeri[Combine$Negeri == "KELANTAN"] <- "Kelantan"
+Combine$Negeri[Combine$Negeri == "MELAKA"] <- "Melaka"
+Combine$Negeri[Combine$Negeri == "NEGERI SEMBILAN"] <- "Negeri Sembilan"
+Combine$Negeri[Combine$Negeri == "PAHANG"] <- "Pahang"
+Combine$Negeri[Combine$Negeri == "PERAK"] <- "Perak"
+Combine$Negeri[Combine$Negeri == "PERLIS"] <- "Perlis"
+Combine$Negeri[Combine$Negeri == "PULAU PINANG"] <- "Pulau Pinang"
+Combine$Negeri[Combine$Negeri == "Penang"] <- "Pulau Pinang"
+Combine$Negeri[Combine$Negeri == "SABAH"] <- "Sabah"
+Combine$Negeri[Combine$Negeri == "SARAWAK"] <- "Sarawak"
+Combine$Negeri[Combine$Negeri == "TERENGGANU"] <- "Trengganu"
+Combine$Negeri[Combine$Negeri == "Terengganu"] <- "Trengganu"
+Combine$Negeri[Combine$Negeri == "WILAYAH PERSEKUTUAN"] <- "Kuala Lumpur"
+Combine$Negeri[Combine$Negeri == "WILAYAH PERSEKUTUAN LABUAN"] <- "Labuan"
+Combine$Negeri[Combine$Negeri == "SELANGOR"] <- "Selangor"
+mygeojson <- download_map_data("https://code.highcharts.com/mapdata/countries/my/my-all.js")
+Combine1 <- Combine %>% filter(Negeri != "Total" & Negeri != " Total" &
+                                 Negeri != "Sarawak (SDMC)") 
+library(varhandle)
+Combine1$Negeri <- as.character(Combine1$Negeri)
+Combine1$Cumulative <- unfactor(Combine1$Cumulative)
+Combine1$Death<- unfactor(Combine1$Death)
+
+Total_cases  <- Combine %>% filter(Negeri=="Total" | Negeri == " Total")
+Total_cases[,2]
+
+
+#Positif
+Map_positive_Malaysia <- highchart() %>%
+  hc_title(text = "Jumlah Kes COVID-19 Mengikut Negeri") %>%
+  hc_subtitle(text = "Jumlah") %>%
+  hc_add_series_map(mygeojson, Combine1,
+                    name = "Negeri",
+                    value = "Cumulative",
+                    joinBy = c("woe-name", "Negeri")) %>%
+  hc_mapNavigation(enabled = T) %>% 
+ hc_subtitle(
+  text = "Sumber Data: https://www.outbreak.my/",
+  align = "left",verticalAlign = "bottom",
+  style = list(color = "#273746", fontWeight = "bold")) %>%
+  hc_add_theme(hc_theme_tufte()) %>% 
+  hc_colorAxis( minColor = "#EBDEF0", maxColor = "#633974")
+
+
+#Mati
+Map_Mati_Malaysia <- highchart() %>%
+  hc_title(text = "Jumlah Kematian COVID-19 Mengikut Negeri") %>%
+  hc_subtitle(text = "Jumlah") %>%
+  hc_add_series_map(mygeojson, Combine1,
+                    name = "Negeri",
+                    value = "Death",
+                    joinBy = c("woe-name", "Negeri")) %>%
+  hc_mapNavigation(enabled = T) %>%
+hc_subtitle(
+  text = "Sumber Data: https://www.outbreak.my/",
+  align = "left",verticalAlign = "bottom",
+  style = list(color = "#273746", fontWeight = "bold")) %>%
+  hc_add_theme(hc_theme_tufte()) %>% 
+  hc_colorAxis( minColor = "#FDEDEC", maxColor = "#B03A2E")
+
+#graph positive
+Graph_Positive_Malaysia <- highchart() %>%
+  hc_xAxis(categories = Combine1$Negeri) %>%
+  hc_add_series(data = Combine1, type = "bar", hcaes(y = Cumulative, color = Negeri),
+                showInLegend = F) %>%
+  hc_exporting(enabled = TRUE) #boleh download data
+
+#Graph Mati
+
+Graph_Mati_Malaysia <- Combine1%>%
+  arrange(Death) %>%
+  hchart(type = "bar", hcaes(x = Negeri, y = Death, color = Negeri))%>%
+  hc_exporting(enabled = TRUE) %>%
+  hc_exporting(enabled = TRUE) #boleh download data
+
+#############################################
+# World Data from outbreak.my
+#############################################
+#Loading the rvest package
+library('rvest')
+#Specifying the url for desired website to be scraped
+url <- 'https://www.outbreak.my/world'
+#Reading the HTML code from the website
+webpage <- read_html(url)
+# NEGARA
+#Using CSS selectors to scrape the title section
+title_data_html <- html_nodes(webpage,'.text-title')
+#Converting the title data to text
+title_data <- html_text(title_data_html)
+#Let's have a look at the Negeri
+head(title_data)
+title_data 
+Negara <- as.data.frame(title_data)
+Negara$title_data <- gsub("\n", "", Negara$title_data)
+head(Negara)
+dim(Negara)
+#CONFIRM CASES
+#Using CSS selectors to scrape the title section
+title_data_html <- html_nodes(webpage,'.text-value-red')
+#Converting the title data to text
+title_data <- html_text(title_data_html)
+#Let's have a look at the Negeri
+head(title_data)
+title_data 
+Confirm_world <- as.data.frame(title_data)
+Confirm_world$title_data <- gsub("\n", "", Confirm_world$title_data)
+Confirm_world$title_data <- gsub("  .*$", "", Confirm_world$title_data)
+head(Confirm_world)
+dim(Confirm_world)
+
+#DEATH
+#Using CSS selectors to scrape the title section
+title_data_html <- html_nodes(webpage,'.text-value-black')
+#Converting the title data to text
+title_data <- html_text(title_data_html)
+#Let's have a look at the Negeri
+head(title_data)
+title_data 
+recovered_world <- as.data.frame(title_data)
+recovered_world$title_data <- gsub("\n", "", recovered_world$title_data)
+recovered_world$title_data <- gsub("  .*$", "", recovered_world$title_data)
+head(recovered_world)
+dim(recovered_world)
+Combine_world <- c()
+Combine_world$Negara <- Negara$title_data
+Combine_world$Confirm <- Confirm_world$title_data
+Combine_world$Death <- recovered_world$title_data
+Combine_world <- as.data.frame(Combine_world)
+Combine_world$Negara <- as.character(Combine_world$Negara)
+library(varhandle)
+Combine_world$Confirm<- unfactor(Combine_world$Confirm)
+Combine_world$Death<- unfactor(Combine_world$Death)
+str(Combine_world)
+Combine_world$Negara <- gsub(" ", "", Combine_world$Negara)
+#####################################
+# World Chart
+#####################################
+library(highcharter)
+mygeojson <- get_data_from_map(download_map_data("https://code.highcharts.com/mapdata/custom/world.js"))
+mygeojson$name #untuk tgk list states yang ada dalam map ini
+world1 <- mygeojson$name
+mine <- Combine_world$Negara
+
+# Finding the discrepency of the Country Name
+check <- setdiff(mine, world1)  
+check
+check_world <- setdiff(world1, mine)
+# write.csv(check_world, "world.csv", row.names = F)
+
+#To change Name "Negeri" according to "woe-name" requirement
+Combine_world$Negara[Combine_world$Negara == "China(mainland)"] <- "China"
+Combine_world$Negara[Combine_world$Negara == "UnitedStates"] <- "United States of America"
+Combine_world$Negara[Combine_world$Negara == "Eritrea"] <- "Eritrea"
+Combine_world$Negara[Combine_world$Negara == "SriLanka"] <- "Sri Lanka"
+Combine_world$Negara[Combine_world$Negara == "PapuaNewGuinea"] <- "Papua New Guinea"
+Combine_world$Negara[Combine_world$Negara == "UnitedKingdom"] <- "United Kingdom"
+Combine_world$Negara[Combine_world$Negara == "SouthKorea"] <- "South Korea"
+Combine_world$Negara[Combine_world$Negara == "Czechia"] <- "Czech Republic"
+Combine_world$Negara[Combine_world$Negara == "SaudiArabia"] <- "Saudi Arabia"
+Combine_world$Negara[Combine_world$Negara == "SouthAfrica"] <- "South Africa"
+Combine_world$Negara[Combine_world$Negara == "HongKong"] <- "Hong Kong"
+Combine_world$Negara[Combine_world$Negara == "DominicanRepublic"] <- "Dominican Republic"
+Combine_world$Negara[Combine_world$Negara == "Serbia"] <- "Republic of Serbia"
+Combine_world$Negara[Combine_world$Negara == "UAE"] <- "United Arab Emirates"
+Combine_world$Negara[Combine_world$Negara == "NewZealand"] <- "New Zealand"
+Combine_world$Negara[Combine_world$Negara == "SanMarino"] <- "San Marino"
+Combine_world$Negara[Combine_world$Negara == "NorthMacedonia"] <- "Macedonia"
+Combine_world$Negara[Combine_world$Negara == "CostaRica"] <- "Costa Rica"
+Combine_world$Negara[Combine_world$Negara == "Bosnia&Herzegovina"] <- "Bosnia and Herzegovina"
+Combine_world$Negara[Combine_world$Negara == "BurkinaFaso"] <- "Burkina Faso"
+Combine_world$Negara[Combine_world$Negara == "IvoryCoast"] <- "Ivory Coast"
+Combine_world$Negara[Combine_world$Negara == "Trinidad&Tobago"] <- "Trinidad and Tobago"
+Combine_world$Negara[Combine_world$Negara == "Congo-Kinshasa"] <- "Democratic Republic of the Congo"
+Combine_world$Negara[Combine_world$Negara == "Guernsey"] <- "Guinea Bissau"
+Combine_world$Negara[Combine_world$Negara == "CentralAfricanRepublic"] <- "Equatorial Guinea"
+Combine_world$Negara[Combine_world$Negara == "ElSalvador"] <- "El Salvador"
+Combine_world$Negara[Combine_world$Negara == "Bahamas"] <- "The Bahamas"
+Combine_world$Negara[Combine_world$Negara == "CentralAfricanRepublic"] <- "Central African Republic"
+Combine_world$Negara[Combine_world$Negara == "CapeVerde"] <- "Cape Verde"
+Combine_world$Negara[Combine_world$Negara == "VaticanCity"] <- "Vatican"
+Combine_world$Negara[Combine_world$Negara == "Antigua&Barbuda"] <- "Antigua and Barbuda"
+Combine_world$Negara[Combine_world$Negara == "St.Lucia"] <- "Saint Lucia"
+Combine_world$Negara[Combine_world$Negara == "St.Vincent&Grenadines"] <- "Saint Vincent and the Grenadines"
+data(worldgeojson, package = "highcharter")
+
+
+World_positive_Map <- highchart() %>%
+  hc_add_series_map(worldgeojson, Combine_world, value = "Confirm", 
+                    joinBy = c('name','Negara'))   %>% 
+  hc_title(text = "Jumlah Kes Positif COVID-19 Mengikut Negara") %>%
+  hc_subtitle(text = "Jumlah") %>%
+  hc_subtitle(
+    text = "Sumber Data: https://www.outbreak.my/",
+    align = "left",verticalAlign = "bottom",
+    style = list(color = "#273746", fontWeight = "bold")) %>%
+  hc_add_theme(hc_theme_tufte()) %>% 
+  hc_colorAxis( minColor = "#D5D8DC", maxColor = "#212F3D") %>%
+  hc_exporting(enabled = TRUE)
+
+World_Death_Map <- highchart() %>%
+  hc_add_series_map(worldgeojson, Combine_world, value = "Death", 
+                    joinBy = c('name','Negara'))   %>% 
+  hc_title(text = "Jumlah Kes Kematian COVID-19 Mengikut Negara") %>%
+  hc_subtitle(text = "Jumlah") %>%
+  hc_subtitle(
+    text = "Sumber Data: https://www.outbreak.my/",
+    align = "left",verticalAlign = "bottom",
+    style = list(color = "#273746", fontWeight = "bold")) %>%
+  hc_add_theme(hc_theme_tufte()) %>% 
+  hc_colorAxis( minColor = "#F2D7D5", maxColor = "#7B241C") %>%
+  hc_exporting(enabled = TRUE)
+
+
+
+
+##############################################
+# From European Centre for Disease Prevention and Control Website
+# https://ourworldindata.org/coronavirus-source-data
+
+library(dplyr)
+data1 <- read.csv("https://covid.ourworldindata.org/data/ecdc/full_data.csv")
+Malaysia <- data1 %>% filter(location== "Malaysia")
+# data1 <- data1 %>% filter(location== "World" | location== "Malaysia" |
+#                             location== "Singapore" | location== "Thailand" |
+#                             location== "Indonesia" |location== "Philippines" |
+#                             location== "Cambodia" |location== "Laos" |
+#                             location== "Vietnam" |location== "Brunei" |
+#                             location== "Timor" |location== "Myanmar" )
+data1$date <- as.character(data1$date)
+
+data1 <- data1 %>% filter( location== "Malaysia" |
+                            location== "Singapore" | location== "Thailand" |
+                            location== "Indonesia" |location== "Philippines" |
+                            location== "Cambodia" |location== "Laos" |
+                            location== "Vietnam" |location== "Brunei" |
+                            location== "Timor" |location== "Myanmar" )                            
+                
+
+#Since in Asia Tengara starts 2020-01-13
+data1 <- data1 %>% arrange(date)
+data1 <- data1 %>% filter(date != "2019-12-31"  & date != "2020-01-01" &
+                            date != "2020-01-02" &
+                            date != "2020-01-03" & date != "2020-01-10" &
+                            date != "2020-01-04" & date != "2020-01-11" &
+                            date != "2020-01-05" & date != "2020-01-12" &
+                            date != "2020-01-06" &
+                            date != "2020-01-07" &
+                            date != "2020-01-08" &
+                            date != "2020-01-09") %>%
+  select(everything())
+
+
+data1$location <- as.character(data1$location)
+data1$location <- as.factor(data1$location)
+#changing character as date format
+data1$date<-  strptime(data1$date, "%Y-%m-%d")
+ data1$date <- as.POSIXct(data1$date)
+
+
+#########
+# Line chart for Total Cases in Asia Tenggara
+#########
+
+library(ggplot2)
+library(plotly)
+ 
+ 
+positif_asia <- ggplot(data1, aes(x=date, y=total_cases)) + 
+  geom_line(aes(color=location), size = 1) + 
+  ggtitle("Jumlah Kes Positif Di Asia Tenggara") + 
+  xlab("Date") + ylab("Jumlah Kes Positif") + 
+  theme_minimal() + 
+  theme(legend.position = "bottom")
+
+
+
+#kes deaths in Asia tenggara
+deaths_asia <- ggplot(data1, aes(x=date, y=total_deaths)) + 
+  geom_line(aes(color=location), size = 1) + 
+  ggtitle("Jumlah Kes Kematian Di Asia Tenggara") + 
+  xlab("Date") + ylab("Jumlah Kes Positif") + 
+  theme_minimal() + 
+  theme(legend.position = "bottom")
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+Malaysia
+=====================================
+
+row 1: 
+---------------------------------------------------
+
+### ***Jumlah Kes Positive ***
+
+```{r}
+valueBox(sum(a4[1,2]),
+         icon = "ion-man", color="lightpink")
+
+```
+
+
+### ***Jumlah Kes Pending***
+```{r}
+valueBox(sum(a4[3,2]),
+         icon = "ion-sad-outline", color="yellow")
+```
+
+
+### ***Jumlah Kes Kematian***
+```{r}
+valueBox(b4[3,2],
+         icon = "ion-heart-broken", color = "#FD4065")
+```
+
+
+### ***Jumlah Kes Sembuh***
+```{r}
+valueBox(b4[1,2],
+         icon = "ion-android-happy")
+```
+
+
+### ***Jumlah Kes di ICU***
+```{r}
+valueBox(b4[2,2],
+         icon = "ion-heart-broken", color="lightpink")
+```
+
+
+### ***Tarikh Akses***
+```{r}
+valueBox(g, 
+         icon = "ion-ios-time-outline", color="#C3F6ED")
+```
+
+
+
+row 2
+--------------------------------------------------------
+
+
+### ***Taburan Kes Positif Mengikut Negeri***
+```{r}
+################
+# Map Cumulative Case 
+################
+
+Map_positive_Malaysia
+
+```
+
+### **Taburan Kes Kematian Mengikut Negeri**
+```{r}
+###############
+# Map Death Case
+############### 
+Map_Mati_Malaysia
+```
+
+row 3
+--------------------------------------------------------
+
+
+### ***Bar Graph - Taburan Kes Mengikut Negeri***
+```{r}
+#### 
+#Bar Chart Cumulative Case Di Malaysia
+####
+
+Graph_Positive_Malaysia
+```
+
+### **Bar Graph - Taburan Kes Kematian Mengikut Negeri**
+```{r}
+###############
+# Map Death Case
+############### 
+#### 
+#Bar Chart Death Case Di Malaysia (Theme Chalk)
+####
+
+Graph_Mati_Malaysia
+```
+
+
+
+Dunia
+=========================================================================
+
+row 1 {.tabset}
+-------------------------------------------------------------------
+
+### Kes Positive
+```{r}
+#Positive
+World_positive_Map
+```
+
+### Kes Kematian
+
+```{r}
+#Positive
+World_Death_Map
+```
+
+
+
+
+
+Ranking Dunia
+=======================================================================
+row 1
+-----------------------------------------------------------------
+
+### Taburan Kes Positif Dunia (Top 30)
+```{r}
+#### 
+#Bar Chart Cumulative Case Di Malaysia
+####
+# ambil 20 countries sahaja
+Combine22 <- Combine_world %>% arrange(-Confirm)
+Combine22 <- head(Combine22, 30)
+
+highchart() %>%
+  hc_xAxis(categories = Combine22$Negara) %>%
+  hc_add_series(data = Combine22, type = "bar",
+                hcaes(y = Confirm, color = Negara),
+                showInLegend = F) %>%
+  hc_exporting(enabled = TRUE) #boleh download data
+```
+
+
+
+### Taburan Kes Kematian Dunia (Top 30)
+```{r}
+#### 
+#Bar Chart Cumulative Case Di Malaysia
+####
+# ambil 20 countries sahaja
+Combine22 <- Combine_world %>% arrange(-Death)
+Combine22 <- head(Combine22, 30)
+
+highchart() %>%
+  hc_xAxis(categories = Combine22$Negara) %>%
+  hc_add_series(data = Combine22, type = "bar",
+                hcaes(y = Death, color = Negara),
+                showInLegend = F) %>%
+  hc_exporting(enabled = TRUE) #boleh download data 
+```
+
+
+
+
+Trend Asia Tenggara
+=========================================================================
+
+row 1 
+-------------------------------------------------------------------
+
+### Trend Kes Positif COVID-19 Di Asia Tenggara
+```{r}
+#Positive
+ggplotly(positif_asia)
+```
+
+### Trend Kes Kematian COVID-19 Di Asia Tenggara
+
+```{r}
+#Kematian
+ggplotly(deaths_asia)
+```
+
+row 2
+------------------------------------------------------------------------
+
+### Trend Kes Positif COVID-19 Di Malaysia
+```{r}
+hchart(Malaysia, "line", 
+       hcaes(x = date, 
+             y = total_cases,
+             group = location)) %>% 
+  hc_title(text = "Siri Masa Kes Positif COVID-19 Di Malaysia")
+```
+
+### Trend Kes Kematian COVID-19 Di Malaysia
+
+```{r}
+hchart(Malaysia, "line", 
+       hcaes(x = date, 
+             y = total_deaths,
+             group = location)) %>% 
+  hc_title(text = "Siri Masa Kes Kematian COVID-19 Di Malaysia")
+```
+
+
+
+
+
+Sumber Data
+=====================================================================================
+
+
+***Dashboard ini Dibina oleh:***
+  
+Mohammad Nasir Abdullah   
+Department of Statistics,    
+Faculty of Computer and Mathematical Sciences,   
+Universiti Teknologi MARA,   
+Tapah Campus, Perak, Malaysia.   
+
+Sumber data didalam Dashboard ini adalah:     
+1) http://www.moh.gov.my/index.php/pages/view/2019-ncov-wuhan    
+2) https://www.outbreak.my/     
+3) https://covid.ourworldindata.org/data/ecdc/full_data.csv    
+
+***Disclaimer***    
+
+1) Data yang dipaparkan didalam Dashboard ini adalah berdasarkan paparan semasa dashboard ini dibina.   
+2) Segala Kenyataan berkaitan data terkini mestilah merujuk kepada Kenyataan Yang dikeluarkan oleh KEMENTERIAN KESIHATAN MALAYSIA dan WORLD HEALTH ORGANIZATION.   
+3) Kami tidak akan bertanggungjawab atas apa kerosakan atau gangguan secara terus atau tidak terus semasa melayari Dashboard ini.     
+4) Dashboard ini dibina hanya semata-mata untuk pendidikan membina Dashboard, Data Visualization, Data Manipulation dan Data Web Scrapping using R Programming.     
+
+***Bahan***    
+1) RStudio    
+2) Packages:     
+- flexdashboard    
+- rvest    
+- highcharacter    
+- dplyr    
+- DT    
+- rpivotTable    
+- varhandle 
